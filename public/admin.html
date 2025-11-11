@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin Dashboard - QuickMail</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    table input, table select { width: 100%; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Dashboard</h1>
+    <nav><a href="index.html">Home</a> | <a href="book.html">Book Delivery</a> | <a href="track.html">Track</a></nav>
+  </header>
+
+  <div class="container">
+    <h2>All Deliveries</h2>
+    <table border="1" cellpadding="6" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Tracking #</th>
+          <th>Sender</th>
+          <th>Receiver</th>
+          <th>Pickup</th>
+          <th>Destination</th>
+          <th>Package Details</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="deliveriesBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+  async function loadDeliveries() {
+    const res = await fetch('/api/all');
+    const deliveries = await res.json();
+    const tbody = document.getElementById('deliveriesBody');
+    tbody.innerHTML = '';
+
+    deliveries.forEach(d => {
+      const row = document.createElement('tr');
+
+      row.innerHTML = `
+        <td>${d.trackingNumber}</td>
+        <td><input value="${d.sender}" onchange="updateField('${d.trackingNumber}', 'sender', this.value)"></td>
+        <td><input value="${d.receiver}" onchange="updateField('${d.trackingNumber}', 'receiver', this.value)"></td>
+        <td><input value="${d.pickup}" onchange="updateField('${d.trackingNumber}', 'pickup', this.value)"></td>
+        <td><input value="${d.destination}" onchange="updateField('${d.trackingNumber}', 'destination', this.value)"></td>
+        <td><input value="${d.packageDetails}" onchange="updateField('${d.trackingNumber}', 'packageDetails', this.value)"></td>
+        <td>
+          <select onchange="updateField('${d.trackingNumber}', 'status', this.value)">
+            <option ${d.status==='Pending Pickup'?'selected':''}>Pending Pickup</option>
+            <option ${d.status==='In Transit'?'selected':''}>In Transit</option>
+            <option ${d.status==='Delivered'?'selected':''}>Delivered</option>
+          </select>
+        </td>
+        <td><button onclick="deleteDelivery('${d.trackingNumber}')">Delete</button></td>
+      `;
+
+      tbody.appendChild(row);
+    });
+  }
+
+  async function updateField(trackingNumber, field, value) {
+    await fetch('/api/update/' + trackingNumber, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [field]: value })
+    });
+    // Optional: reload table
+    // loadDeliveries();
+  }
+
+  async function deleteDelivery(trackingNumber) {
+    if (!confirm("Delete this delivery?")) return;
+    await fetch('/api/update/' + trackingNumber, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deleted: true }) // soft delete
+    });
+    loadDeliveries();
+  }
+
+  loadDeliveries();
+  </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin Login - QuickMail</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Admin Login</h1>
+    <nav><a href="index.html">Home</a></nav>
+  </header>
+
+  <div class="container">
+    <label>Username</label>
+    <input id="username" type="text">
+    <label>Password</label>
+    <input id="password" type="password">
+    <button onclick="login()">Login</button>
+    <p id="result" style="color:red;"></p>
+  </div>
+
+  <script>
+  async function login() {
+    try {
+      const res = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: username.value,
+          password: password.value
+        })
+      });
+
+      if (res.ok) {
+        // Login successful
+        window.location.href = "admin.html";
+      } else {
+        const out = await res.json();
+        result.textContent = out.error || "Login failed";
+      }
+    } catch (err) {
+      result.textContent = "Server error";
+      console.error(err);
+    }
+  }
+  </script>
+</body>
+</html>
