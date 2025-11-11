@@ -75,6 +75,8 @@ app.post("/api/admin-login", (req, res) => {
     res.status(401).json({ success: false, error: "Invalid credentials" });
   }
 });
-app.listen(PORT, () =>
-  console.log(`🚀 Server running at http://localhost:${PORT}`)
-);
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
