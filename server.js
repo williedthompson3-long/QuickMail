@@ -75,6 +75,56 @@ app.post("/api/admin-login", (req, res) => {
     res.status(401).json({ success: false, error: "Invalid credentials" });
   }
 });
+
+// Existing routes here
+app.post('/api/book', async (req, res) => {
+  // booking logic
+});
+
+app.get('/api/track/:id', async (req, res) => {
+  // tracking logic
+});
+
+
+// 🆕 ADMIN ROUTES — paste below this comment
+// Get all deliveries
+app.get('/api/deliveries', async (req, res) => {
+  try {
+    const data = await fs.readJson('./db/deliveries.json');
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load deliveries' });
+  }
+});
+
+// Update all deliveries
+app.post('/api/update-deliveries', async (req, res) => {
+  try {
+    await fs.writeJson('./db/deliveries.json', req.body, { spaces: 2 });
+    res.json({ message: 'Deliveries updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save deliveries' });
+  }
+});
+
+// Delete one delivery
+app.delete('/api/delete-delivery/:id', async (req, res) => {
+  try {
+    const data = await fs.readJson('./db/deliveries.json');
+    const filtered = data.filter(d => d.id !== req.params.id);
+    await fs.writeJson('./db/deliveries.json', filtered, { spaces: 2 });
+    res.json({ message: 'Delivery deleted' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete' });
+  }
+});
+
+
+// ✅ Keep your server start at the very end
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, "0.0.0.0", () => {
